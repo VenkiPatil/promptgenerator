@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prompt Generator</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+            color: #333;
+            display: flex;
+            justify-content: space-between;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            color: #4CAF50;
+            margin-bottom: 20px;
+        }
+        h2 {
+            font-size: 1.5rem;
+            color: #555;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #444;
+        }
+        input[type="text"], input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            font-size: 1rem;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+        th {
+            background-color: #f4f4f4;
+            color: #555;
+        }
+        .output-table {
+            margin-top: 20px;
+        }
+        .section {
+            margin-bottom: 30px;
+        }
+        .export-button {
+            margin-top: 20px;
+        }
+        /* Hide Generated Prompts Section by Default */
+        #generatedPromptsSection {
+            display: none;
+        }
+        /* Error Message Style */
+        .error-message {
+            color: red;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        /* Highlight Missing Fields */
+        .error-field {
+            border: 2px solid red !important;
+        }
+        /* Light Overlay for Sections */
+        .home-section {
+            background-color: #f9f9ff;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+        .category-section {
+            background-color: #fff9f9;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+        .product-section {
+            background-color: #f9fff9;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+        /* Instructions Sidebar */
+        .instructions {
+            width: 300px;
+            margin: 20px;
+            padding: 20px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .instructions h3 {
+            font-size: 1.2rem;
+            color: #4CAF50;
+            margin-bottom: 10px;
+        }
+        .instructions ul {
+            list-style-type: disc;
+            margin-left: 20px;
+        }
+        .instructions li {
+            margin-bottom: 5px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Prompt Generator</h1>
+
+        <!-- Import Data Section -->
+        <div class="section">
+            <h2>Import Data</h2>
+            <input type="file" id="importFile" accept=".csv">
+            <button onclick="importData()">Import Data</button>
+            <div id="importErrorMessage" class="error-message" style="display: none;">Please select a CSV file to import.</div>
+        </div>
+
+        <!-- Keywords and URLs Section -->
+        <div class="section">
+            <h2>Keywords and URLs</h2>
+
+            <!-- Home Section -->
+            <div class="home-section">
+                <h3>Home Page</h3>
+                <label for="homeKeywords">Keywords (comma-separated):</label>
+                <input type="text" id="homeKeywords" placeholder="Enter keywords">
+                <label for="homeUrl">Target URL:</label>
+                <input type="text" id="homeUrl" placeholder="Enter target URL">
+            </div>
+
+            <!-- Category Section -->
+            <div class="category-section">
+                <h3>Category Page</h3>
+                <label for="categoryKeywords">Keywords (comma-separated):</label>
+                <input type="text" id="categoryKeywords" placeholder="Enter keywords">
+                <label for="categoryUrl">Target URL:</label>
+                <input type="text" id="categoryUrl" placeholder="Enter target URL">
+            </div>
+
+            <!-- Product Section -->
+            <div class="product-section">
+                <h3>Product Page</h3>
+                <table id="productTable">
+                    <thead>
+                        <tr>
+                            <th>Keyword</th>
+                            <th>Target URL</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><input type="text" class="keyword" placeholder="Enter keyword"></td>
+                            <td><input type="text" class="url" placeholder="Enter URL"></td>
+                            <td><button class="add-row" data-table="productTable">Add Row</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Generate Prompts Button -->
+        <button onclick="generatePrompts()">Generate Prompts</button>
+
+        <!-- Error Message -->
+        <div id="errorMessage" class="error-message" style="display: none;"></div>
+
+        <!-- Generated Prompts Section -->
+        <div id="generatedPromptsSection" class="section">
+            <h2>Generated Prompts</h2>
+            <table class="output-table">
+                <thead>
+                    <tr>
+                        <th>Keyword Variation</th>
+                        <th>Blog Prompt</th>
+                        <th>PDF Guide Prompt</th>
+                    </tr>
+                </thead>
+                <tbody id="outputTableBody">
+                </tbody>
+            </table>
+            <button class="export-button" onclick="exportToGoogleSheets()">Export to Google Sheets</button>
+        </div>
+    </div>
+
+    <!-- Instructions Sidebar -->
+    <div class="instructions">
+        <h3>CSV File Instructions</h3>
+        <ul>
+            <li>Use commas (`,`) as delimiters.</li>
+            <li>Include the following columns: `Section`, `Keyword`, `URL`.</li>
+            <li>`Section` values should be: `Home`, `Category`, or `Product`.</li>
+            <li>Each row represents one keyword and its URL.</li>
+            <li>Save the file with a `.csv` extension.</li>
+        </ul>
+    </div>
+
+    <script>
+        // Event delegation for Add Row and Remove Row buttons
+        document.addEventListener('click', function (event) {
+            const target = event.target;
+
+            // Handle "Add Row" button click
+            if (target.classList.contains('add-row')) {
+                const tableId = target.getAttribute('data-table');
+                addRow(tableId);
+            }
+
+            // Handle "Remove Row" button click
+            if (target.classList.contains('remove-row')) {
+                const row = target.closest('tr');
+                if (row) {
+                    row.parentNode.removeChild(row);
+                }
+            }
+        });
+
+        function addRow(tableId) {
+            try {
+                const table = document.getElementById(tableId).getElementsByTagName('tbody')[0];
+                const newRow = table.insertRow();
+
+                // Create cells for the new row
+                const cell1 = newRow.insertCell(0);
+                const cell2 = newRow.insertCell(1);
+                const cell3 = newRow.insertCell(2);
+
+                // Add input fields for Keyword and URL
+                const keywordInput = document.createElement('input');
+                keywordInput.type = 'text';
+                keywordInput.className = 'keyword';
+                keywordInput.placeholder = 'Enter keyword';
+
+                const urlInput = document.createElement('input');
+                urlInput.type = 'text';
+                urlInput.className = 'url';
+                urlInput.placeholder = 'Enter URL';
+
+                // Add a "Remove" button
+                const removeButton = document.createElement('button');
+                removeButton.textContent = 'Remove';
+                removeButton.className = 'remove-row';
+
+                // Append elements to their respective cells
+                cell1.appendChild(keywordInput);
+                cell2.appendChild(urlInput);
+                cell3.appendChild(removeButton);
+            } catch (error) {
+                console.error("Error adding row:", error);
+                alert("An error occurred while adding a new row. Please check the console for details.");
+            }
+        }
+
+        async function importData() {
+            try {
+                const fileInput = document.getElementById('importFile');
+                const file = fileInput.files[0];
+                if (!file) {
+                    document.getElementById('importErrorMessage').style.display = 'block';
+                    return;
+                }
+                document.getElementById('importErrorMessage').style.display = 'none';
+
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const content = e.target.result;
+                    let rows;
+
+                    // Detect delimiter (comma or tab)
+                    if (content.includes('\t')) {
+                        rows = parseCSV(content, '\t'); // Tab-delimited
+                    } else {
+                        rows = parseCSV(content, ','); // Comma-delimited
+                    }
+
+                    // Validate required columns
+                    const requiredColumns = ['Section', 'Keyword', 'URL'];
+                    if (!rows.every(row => requiredColumns.every(col => row[col]))) {
+                        alert("CSV file is missing required columns: Section, Keyword, URL");
+                        return;
+                    }
+
+                    // Clear existing data
+                    document.getElementById('homeKeywords').value = '';
+                    document.getElementById('homeUrl').value = '';
+                    document.getElementById('categoryKeywords').value = '';
+                    document.getElementById('categoryUrl').value = '';
+                    document.getElementById('productTable').getElementsByTagName('tbody')[0].innerHTML = '';
+
+                    // Populate fields
+                    const homeKeywords = [];
+                    const categoryKeywords = [];
+
+                    rows.forEach(row => {
+                        if (row.Section === 'Home') {
+                            homeKeywords.push(row.Keyword.trim());
+                            document.getElementById('homeUrl').value = row.URL.trim(); // Set URL once
+                        } else if (row.Section === 'Category') {
+                            categoryKeywords.push(row.Keyword.trim());
+                            document.getElementById('categoryUrl').value = row.URL.trim(); // Set URL once
+                        } else if (row.Section === 'Product') {
+                            const table = document.getElementById('productTable').getElementsByTagName('tbody')[0];
+                            const newRow = table.insertRow();
+
+                            const cell1 = newRow.insertCell(0);
+                            const cell2 = newRow.insertCell(1);
+                            const cell3 = newRow.insertCell(2);
+
+                            const keywordInput = document.createElement('input');
+                            keywordInput.type = 'text';
+                            keywordInput.className = 'keyword';
+                            keywordInput.value = row.Keyword.trim();
+
+                            const urlInput = document.createElement('input');
+                            urlInput.type = 'text';
+                            urlInput.className = 'url';
+                            urlInput.value = row.URL.trim();
+
+                            const removeButton = document.createElement('button');
+                            removeButton.textContent = 'Remove';
+                            removeButton.className = 'remove-row';
+
+                            cell1.appendChild(keywordInput);
+                            cell2.appendChild(urlInput);
+                            cell3.appendChild(removeButton);
+                        }
+                    });
+
+                    // Populate Home and Category keywords
+                    document.getElementById('homeKeywords').value = homeKeywords.join(', ');
+                    document.getElementById('categoryKeywords').value = categoryKeywords.join(', ');
+                };
+                reader.readAsText(file);
+            } catch (error) {
+                console.error("Error importing data:", error);
+                alert("An error occurred while importing data. Please check the console for details.");
+            }
+        }
+
+        function parseCSV(content, delimiter) {
+            const rows = [];
+            const lines = content.split('\n').filter(line => line.trim() !== '');
+            const headers = lines[0].split(delimiter).map(header => header.trim());
+
+            for (let i = 1; i < lines.length; i++) {
+                const values = lines[i].split(delimiter).map(value => value.trim());
+                if (values.length === headers.length) {
+                    const row = {};
+                    headers.forEach((header, index) => {
+                        row[header] = values[index];
+                    });
+                    rows.push(row);
+                }
+            }
+            return rows;
+        }
+
+        function generatePrompts() {
+            try {
+                // Collect all keywords and URLs
+                const homeKeywords = document.getElementById('homeKeywords').value.split(',').map(k => k.trim());
+                const homeUrl = document.getElementById('homeUrl').value.trim();
+                const categoryKeywords = document.getElementById('categoryKeywords').value.split(',').map(k => k.trim());
+                const categoryUrl = document.getElementById('categoryUrl').value.trim();
+                const productKeywords = Array.from(document.querySelectorAll('#productTable .keyword')).map(input => input.value.trim());
+                const productUrls = Array.from(document.querySelectorAll('#productTable .url')).map(input => input.value.trim());
+
+                // Validation: Check if all required fields are filled
+                const errorMessage = document.getElementById('errorMessage');
+                errorMessage.innerHTML = '';
+                let isValid = true;
+
+                // Reset field highlights
+                document.getElementById('homeKeywords').classList.remove('error-field');
+                document.getElementById('homeUrl').classList.remove('error-field');
+                document.getElementById('categoryKeywords').classList.remove('error-field');
+                document.getElementById('categoryUrl').classList.remove('error-field');
+
+                if (homeKeywords.some(k => k === '') || !homeUrl) {
+                    errorMessage.innerHTML += 'Home Keywords or URL is missing.<br>';
+                    document.getElementById('homeKeywords').classList.add('error-field');
+                    document.getElementById('homeUrl').classList.add('error-field');
+                    isValid = false;
+                }
+                if (categoryKeywords.some(k => k === '') || !categoryUrl) {
+                    errorMessage.innerHTML += 'Category Keywords or URL is missing.<br>';
+                    document.getElementById('categoryKeywords').classList.add('error-field');
+                    document.getElementById('categoryUrl').classList.add('error-field');
+                    isValid = false;
+                }
+                if (productKeywords.some(k => k === '') || productUrls.some(u => u === '')) {
+                    errorMessage.innerHTML += 'Product Keywords or URLs are missing.<br>';
+                    isValid = false;
+                }
+
+                if (!isValid) {
+                    errorMessage.style.display = 'block';
+                    return;
+                }
+                errorMessage.style.display = 'none'; // Hide error message if valid
+
+                const outputTableBody = document.getElementById('outputTableBody');
+                outputTableBody.innerHTML = ''; // Clear previous output
+
+                // Generate prompts for all combinations
+                homeKeywords.forEach(homeKeyword => {
+                    categoryKeywords.forEach(categoryKeyword => {
+                        productKeywords.forEach((productKeyword, pIndex) => {
+                            const keywords = [homeKeyword, categoryKeyword, productKeyword];
+                            const urls = [homeUrl, categoryUrl, productUrls[pIndex]];
+
+                            // Blog Prompt
+                                                        // Blog Prompt (continued)
+                            const blogPrompt = `I want you to act as a blogger and write a blog post about topic [for topic/blog title, use below mentioned keywords search what competitors using based on it form a title and use it as a topic], with a friendly and approachable tone that engages readers. Write in a personal style using singular first-person pronouns only. Include the below mentioned three keywords throughout the article and hyperlink each keyword with respective URL. Use headings, subheadings, bullet points, table[if required only] and bold to organize the information and write 1000 words. Position of using keywords is- 1st keyword in 1st paragraph, 2nd in the middle of article and last 3rd one towards end and hyperlink each keyword only once with respective link URL.
+
+Keywords- '${keywords.join('\', \'')}'
+Link URLs-
+1st keyword link- '${urls[0]}'
+2nd keyword link- '${urls[1]}'
+3rd keyword link- '${urls[2]}'
+
+Must follow conditions:
+1. Hyperlink only keywords I mentioned not other than that.
+2. Hyperlink each keyword only and only once with respective link I provided.
+3. So article must have only three links don't cross this limit[must and should].`;
+
+                            // PDF Guide Prompt
+                            const pdfGuidePrompt = `Create PDF guide content for it in 300 words. Write some unique title and content for it. Don't use words like discover, unveiling, or similar kinds of words in the title. Use some eye-catching words. Write a Table of Contents at the beginning. Use bullet points wherever required. Position of using keywords is- 1st keyword in 1st paragraph, 2nd in the middle of the article, and last 3rd one towards the end. Hyperlink each keyword only once with the respective link URL.
+
+Keywords- '${keywords.join('\', \'')}'
+Link URLs-
+1st keyword link- '${urls[0]}'
+2nd keyword link- '${urls[1]}'
+3rd keyword link- '${urls[2]}'
+
+Must follow conditions:
+1. Hyperlink only keywords I mentioned, not others.
+2. Hyperlink each keyword only once with the respective link provided.
+3. The article must have only three links—don't exceed this limit.`;
+
+                            // Add the result to the output table
+                            const newRow = outputTableBody.insertRow();
+                            const cell1 = newRow.insertCell(0);
+                            const cell2 = newRow.insertCell(1);
+                            const cell3 = newRow.insertCell(2);
+
+                            cell1.textContent = keywords.join(', ');
+                            cell2.textContent = blogPrompt;
+                            cell3.textContent = pdfGuidePrompt;
+                        });
+                    });
+                });
+
+                // Show the Generated Prompts Section
+                const generatedPromptsSection = document.getElementById('generatedPromptsSection');
+                generatedPromptsSection.style.display = 'block';
+            } catch (error) {
+                console.error("Error generating prompts:", error);
+                alert("An error occurred while generating prompts. Please check the console for details.");
+            }
+        }
+
+        function exportToGoogleSheets() {
+            try {
+                const outputTableBody = document.getElementById('outputTableBody');
+                let csvContent = "Keyword Variation,Blog Prompt,PDF Guide Prompt\n";
+
+                Array.from(outputTableBody.rows).forEach(row => {
+                    const keywordVariation = row.cells[0].textContent;
+                    const blogPrompt = row.cells[1].textContent;
+                    const pdfGuidePrompt = row.cells[2].textContent;
+                    csvContent += `"${keywordVariation}","${blogPrompt}","${pdfGuidePrompt}"\n`;
+                });
+
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement("a");
+                const url = URL.createObjectURL(blob);
+                link.setAttribute("href", url);
+                link.setAttribute("download", "generated_prompts.csv");
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } catch (error) {
+                console.error("Error exporting to Google Sheets:", error);
+                alert("An error occurred while exporting data. Please check the console for details.");
+            }
+        }
+    </script>
+</body>
+</html>
