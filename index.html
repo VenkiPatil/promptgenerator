@@ -455,8 +455,6 @@
                             // Blog Prompt
                                                         // Blog Prompt (continued)
                             const blogPrompt = `I want you to act as a blogger and write a blog post about topic [for topic/blog title, use below mentioned keywords search what competitors using based on it form a title and use it as a topic], with a friendly and approachable tone that engages readers. Write in a personal style using singular first-person pronouns only. Include the below mentioned three keywords throughout the article and hyperlink each keyword with respective URL. Use headings, subheadings, bullet points, table[if required only] and bold to organize the information and write 1000 words. Position of using keywords is- 1st keyword in 1st paragraph, 2nd in the middle of article and last 3rd one towards end and hyperlink each keyword only once with respective link URL.
-if the article you generated have any issue/issues i'll mention 'correct' then you have to regenerate article by following 'Must follow conditions' i mentioned from starting
-Keywords- '${keywords.join('\', \'')}'
 Link URLs-
 1st keyword link- '${urls[0]}'
 2nd keyword link- '${urls[1]}'
@@ -465,7 +463,8 @@ Link URLs-
 Must follow conditions:
 1. Hyperlink only keywords I mentioned not other than that.
 2. Hyperlink each keyword only and only once with respective link I provided.
-3. So article must have only three links don't cross this limit[must and should].`;
+3. So article must have only three links don't cross this limit[must and should]. if the article you generated have any issue/issues i'll mention 'correct' then you have to regenerate article by following 'Must follow conditions' i mentioned from starting
+Keywords- '${keywords.join('\', \'')}'`;
 
                             // PDF Guide Prompt
                             const pdfGuidePrompt = `Create PDF guide content for it in 300 words. Write some unique title and content for it. Don't use words like discover, unveiling, or similar kinds of words in the title. Use some eye-catching words. Write a Table of Contents at the beginning. Use bullet points wherever required. Position of using keywords is- 1st keyword in 1st paragraph, 2nd in the middle of the article, and last 3rd one towards the end. Hyperlink each keyword only once with the respective link URL.
